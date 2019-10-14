@@ -3,11 +3,21 @@ const webpack = require('webpack')
 const ExtractPlugin = require('extract-text-webpack-plugin')
 const merge = require('webpack-merge')
 const baseConfig = require('./webpack.config.base')
+const HTMLPlugin = require('html-webpack-plugin')
 
 const isDev = process.env.NODE_ENV === 'development'
 
+const defaultPlugins = [ // 服务端渲染不适用这个配置，所以放入client
+    new webpack.DefinePlugin({
+        'process.env': {
+            NODE_ENV: isDev ? '"development"' : '"production"'
+        }
+    }),
+    new HTMLPlugin()
+];
+
 const devServer = {
-    port: 8000,
+    port: 7999,
     host: '0.0.0.0',
     overlay: {
         errors: true,
@@ -25,7 +35,7 @@ if (isDev) {
                 {
                     test: /\.styl/,
                     use: [
-                        'style-loader',
+                        'vue-style-loader', // 热更新
                         'css-loader',
                         {
                             loader: 'postcss-loader',
@@ -39,15 +49,15 @@ if (isDev) {
             ]
         },
         devServer,
-        plugins:[
+        plugins:defaultPlugins.concat([
             new webpack.HotModuleReplacementPlugin(),
             new webpack.NoEmitOnErrorsPlugin()
-        ]
+        ])
     });
 } else {
     config = merge(baseConfig,{
         entry:{
-            app: path.join(__dirname, '../src/index.js'),
+            app: path.join(__dirname, '../client/index.js'),
             vendor: ['vue']
         },
         output:{
@@ -58,7 +68,7 @@ if (isDev) {
                 {
                     test: /\.styl/,
                     use: ExtractPlugin.extract({
-                        fallback: 'style-loader',
+                        fallback: 'vue-style-loader',
                         use: [
                             'css-loader',
                             {
@@ -73,7 +83,7 @@ if (isDev) {
                 }
             ]
         },
-        plugins:[
+        plugins:defaultPlugins.concat([
             new ExtractPlugin('styles.[contentHash:8].css'),
             new webpack.optimize.CommonsChunkPlugin({
                 name: 'vendor'
@@ -81,7 +91,7 @@ if (isDev) {
             new webpack.optimize.CommonsChunkPlugin({
                 name: 'runtime'
             })
-        ]
+        ])
     })
 }
 
