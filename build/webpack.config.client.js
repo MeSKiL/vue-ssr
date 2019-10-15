@@ -13,7 +13,9 @@ const defaultPlugins = [ // 服务端渲染不适用这个配置，所以放入c
             NODE_ENV: isDev ? '"development"' : '"production"'
         }
     }),
-    new HTMLPlugin()
+    new HTMLPlugin({
+        template:path.join(__dirname,'template.html')
+    })
 ];
 
 const devServer = {
@@ -21,6 +23,9 @@ const devServer = {
     host: '0.0.0.0',
     overlay: {
         errors: true,
+    },
+    historyApiFallback:{
+      index:'/index.html' // 与publicPath匹配
     },
     hot: true
 };

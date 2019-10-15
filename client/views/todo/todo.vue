@@ -1,4 +1,4 @@
-eslin<template>
+<template>
   <section class="real-app">
     <input
       type="text"
@@ -19,6 +19,7 @@ eslin<template>
       @toggle="toggleFilter"
       @clearAllCompleted="clearAllCompleted"
     />
+    <!--<router-view />-->
   </section>
 </template>
 
@@ -27,6 +28,24 @@ import Item from './item.vue'
 import Tabs from './tabs.vue'
 let id = 0
 export default {
+  beforeRouteEnter(to,from,next){ // 拿不到this
+    console.log('todo before enter');
+    next(vm => {
+      console.log('after enter vm.id is',vm.id)
+    });
+  },
+  beforeRouteUpdate(to,from,next){ // 路由更新可以获取数据
+    console.log('todo update enter');
+    next();
+  },
+  beforeRouteLeave(to,from,next){
+    console.log('todo leave enter');
+    // if(global.confirm('are you sure?')){
+    //   next()
+    // }
+    next();
+  },
+  props:['id'],
   data() {
     return {
       todos: [],
@@ -36,6 +55,9 @@ export default {
   components: {
     Item,
     Tabs,
+  },
+  mounted(){
+    console.log(this.$route)
   },
   computed: {
     filteredTodos() {
